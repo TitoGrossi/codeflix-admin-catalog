@@ -1,0 +1,7 @@
+.history/
+*.pyc
+.docker
+__pypackages__
+.pytest_cache
+.vscode
+.devcontainer
