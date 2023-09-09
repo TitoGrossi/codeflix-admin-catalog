@@ -13,6 +13,9 @@ from __seedwork.exceptions import InvalidUUIDException
 class StubOneProp(ValueObject):
     prop: str
 
+    def _validate(self):
+        pass
+
 
 # Class to immitate defined behaviour to test ABC
 @dataclass(frozen=True)
@@ -20,13 +23,21 @@ class StubTwoProp(ValueObject):
     prop1: str
     prop2: str
 
+    def _validate(self):
+        pass
+
 
 class TestValueObject(unittest.TestCase):
     def test_is_dataclass(self):
         self.assertTrue(is_dataclass(UniqueEntityId))
 
     def test_is_abc(self):
-        self.assertIsInstance(ValueObject(), ABC)
+        self.assertTrue(
+            issubclass(
+                ValueObject,
+                ABC,
+            )  # pyright: ignore[reportUnnecessaryIsInstance]
+        )
 
     def test_init_prop(self):
         vo = StubOneProp(prop="value")
@@ -49,7 +60,7 @@ class TestValueObject(unittest.TestCase):
     def test_is_immutable(self):
         with self.assertRaises(FrozenInstanceError):
             vo = StubOneProp(prop="value")
-            vo.prop = "prop"
+            vo.prop = "prop"  # pyright: ignore[reportGeneralTypeIssues]
 
 
 class TestUniqueEntityIdUnit(unittest.TestCase):
@@ -59,9 +70,11 @@ class TestUniqueEntityIdUnit(unittest.TestCase):
     def test_validate_error_for_non_valid_uuid(self):
         with patch.object(
             UniqueEntityId,
-            "_UniqueEntityId__validate",
+            "_validate",
             autospec=True,
-            side_effect=UniqueEntityId._UniqueEntityId__validate,
+            side_effect=(
+                UniqueEntityId._validate  # pyright: ignore[reportPrivateUsage]
+            ),
         ) as mock_validate:
             with self.assertRaises(InvalidUUIDException) as assert_error:
                 UniqueEntityId("lasdfjklskj")
@@ -72,9 +85,11 @@ class TestUniqueEntityIdUnit(unittest.TestCase):
     def test_accepts_valid_uuid_passed_in_constructor(self):
         with patch.object(
             UniqueEntityId,
-            "_UniqueEntityId__validate",
+            "_validate",
             autospec=True,
-            side_effect=UniqueEntityId._UniqueEntityId__validate,
+            side_effect=(
+                UniqueEntityId._validate  # pyright: ignore[reportPrivateUsage]
+            ),
         ) as mock_validate:
             value_object = UniqueEntityId(
                 "afbec0bc-49d4-4085-82d4-9a6aabd568c9")
@@ -84,7 +99,7 @@ class TestUniqueEntityIdUnit(unittest.TestCase):
 
     def test_uuid_converted_to_str(self):
         uuid_value = uuid.uuid4()
-        value_object = UniqueEntityId(uuid_value)
+        value_object = UniqueEntityId(str(uuid_value))
         self.assertEqual(value_object.id, str(uuid_value))
 
     def test_generate_id_if_no_arg_for_id_is_passed(self):
@@ -95,4 +110,6 @@ class TestUniqueEntityIdUnit(unittest.TestCase):
     def test_is_immutable(self):
         with self.assertRaises(FrozenInstanceError):
             value_object = UniqueEntityId()
-            value_object.id = "ldkfjasl"
+            value_object.id = (  # pyright: ignore[reportGeneralTypeIssues]
+                "ldkfjasl"
+            )

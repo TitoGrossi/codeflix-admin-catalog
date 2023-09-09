@@ -8,6 +8,8 @@ authors = [
 license-expression = "MIT"
 dependencies = [
     "pytest>=7.1.1",
+    "pydantic>=1.9.1",
+    "djangorestframework>=3.13.1",
 ]
 requires-python = ">=3.10"
 
@@ -20,8 +22,16 @@ Homepage = ""
 dev = [
     "autopep8>=1.6.0",
     "pylint>=2.13.4",
+    "mypy>=0.960",
+    "djangorestframework-stubs>=1.8.0",
 ]
 
 [build-system]
 requires = ["pdm-pep517>=0.12.0"]
 build-backend = "pdm.pep517.api"
+
+[tool.mypy]
+exclude = [
+    "__pypackages__/"
+]
+plugins = ["mypy_drf_plugin.main"]
